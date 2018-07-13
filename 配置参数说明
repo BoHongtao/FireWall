@@ -1,0 +1,21 @@
+address id 名字,定义一个网络对象的名字
+eg:
+  address id 37 "127.0.0.0/8"
+    ip 127.0.0.0/8
+    
+    
+定义协议类型和端口号，定义协议+端口号
+eg: 
+service "TCP3000"
+  tcp dst-port 3000 
+  
+ 策略：
+ rule id 59
+  action 允许还是拒绝：permit/deny
+  src-zone "trust"
+  dst-zone "untrust"
+  src-addr 网络对象名字
+  dst-addr 网络对象名字
+  service  协议+端口号名字
+
+exit
