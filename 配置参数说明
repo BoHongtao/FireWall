@@ -53,20 +53,20 @@ ip = IP('74.0.193.20/32')
          
   飞塔防火墙配置参数说明：
   地址：
-  config firewall address       ---------------- 地址配置开始
-    edit "all"                  ---------------- 地址名字
+  config firewall address                           ---------------- 地址配置开始
+    edit "all"                                      ---------------- 地址名字
         set associated-interface ''
         set color 0
         set comment ''
         set type ipmask
-        set subnet 0.0.0.0 0.0.0.0 --------------IP+掩码（单一的ip主机地址）
+        set subnet 0.0.0.0 0.0.0.0                  --------------IP+掩码（单一的ip主机地址）
     next
     edit "SSLVPN_TUNNEL_ADDR1"
         set associated-interface ''
         set color 0
         set comment ''
         set type iprange
-        set end-ip 11.222.124.20      -----------------ip段
+        set end-ip 11.222.124.20                    -----------------ip段
         set start-ip 11.222.124.200
     next
     edit "128.0.0.0/8"
@@ -76,6 +76,36 @@ ip = IP('74.0.193.20/32')
         set type ipmask
         set subnet 128.0.0.0 255.0.0.0
     next
-    end                     ------------------地址配置结束
+    举例：128.*.160-191.255（128.0.160.0-128.255.191.255）范围的地址可以定义如下
+  edit "128.0.160.0/255.0.224.0"
+        set associated-interface port2
+        set type wildcard                      -------------反掩码的标识，默认是ipmask
+        set wildcard 128.0.160.0 255.0.224.0   -------------实际地址+反掩码
+    end                                        ------------------地址配置结束
     
+    服务：
+    单个短连接服务，如TCP/7001要求输出格式如下：
+        config firewall service custom
+          edit 服务名称
+                set protocol TCP/UDP/SCTP
+                set 服务类型-portrange 服务端口
+          end
+          edit 服务名称
+                set protocol TCP/UDP/SCTP
+                set 服务类型-portrange 服务端口1  服务端口2  服务端口n
+           end
+       eg.
+       config firewall service custom
+          edit UDP/7001-9001
+                set protocol TCP/UDP/SCTP
+                set udp-portrange 7001-9001
+           end
+           edit UDP/7001
+                set protocol TCP/UDP/SCTP
+                set udp-portrange 7001
+            end
+            edit UDP/9801-9820/1380/80/7001-9001
+                set protocol TCP/UDP/SCTP
+                set udp-portrange 9801-9820 1380 80 7001-9001
+              end
     
