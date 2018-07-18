@@ -109,3 +109,45 @@ ip = IP('74.0.193.20/32')
                 set udp-portrange 9801-9820 1380 80 7001-9001
               end
     
+策略：
+        普通策略定义格式如下：
+        config firewall policy
+            edit 策略数字ID
+                set srcintf 源接口
+                set dstintf 目的接口
+                    set srcaddr 源地址名称1 源地址名称2 源地址名称n
+                    set dstaddr 目的地址名称1 目的地址名称2 目的地址名称n
+                set action accept
+                set schedule always
+                    set service 服务端口名称1 服务端口名称2  服务端口名称n
+            end
+         eg.
+         config firewall policy
+            edit 100
+                set srcintf port2
+                set dstintf port1
+                    set srcaddr  128.64.183.25/32 128.64.183.3/32
+                    set dstaddr all //注：这里目的地址为所有地址
+                set action accept
+                set schedule always
+                    set service TCP/7001-9001 TCP/7001/8001/9001 
+               end
+         
+         
+         在普通策略的基础上再定义set session-ttl 43200
+        config firewall policy
+            edit 策略数字ID
+                set session-ttl 43200
+         end
+         eg.
+             config firewall policy
+                edit 100
+                    set srcintf port2
+                    set dstintf port1
+                        set srcaddr  128.64.183.25/32 128.64.183.3/32
+                        set dstaddr all //注：这里目的地址为所有地址
+                    set action accept
+                    set schedule always
+                        set service ANY //注：这里服务端口为所有端口
+                    set session-ttl 43200
+                end
