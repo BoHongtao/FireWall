@@ -133,7 +133,6 @@ ip = IP('74.0.193.20/32')
                     set service TCP/7001-9001 TCP/7001/8001/9001 
                end
          
-         
          在普通策略的基础上再定义set session-ttl 43200
         config firewall policy
             edit 策略数字ID
@@ -151,3 +150,14 @@ ip = IP('74.0.193.20/32')
                         set service ANY //注：这里服务端口为所有端口
                     set session-ttl 43200
                 end
+                
+                
+                
+                
+物理接口：
+        config system interface
+            edit "port1"
+                set ip 114.12.214.190 255.255.255.248
+             next
+        end
+        上个设备的下一跳是否在set ip的网段中，如果在的话，物理接口就是port1
