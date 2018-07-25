@@ -24,6 +24,19 @@
        exit
 
 
+接口：
+    interface ethernet0/0
+      zone  "mgt"
+      ip address 11.161.241.5 255.255.255.255
+      description "connect.................... YQA-OPN-F05DWGL-SW2 G1/0/9"
+      manage ip 112.11.21.3
+      manage ssh
+      manage ping
+      manage snmp
+      manage https
+    exit
+    这里配置了出入物理接口，我们根据入口ip，判断入口ip是否在ip address定义的网段中，是的话，接口名字就是ethernet0/0，出接口同样
+    特别注意，入接口只需要对比精确ip就可以了，就是比较是否等于11.161.241.5，是的话就可以了，出接口才需要判断网段
 
 转发规则：
   如果数据报文可以过墙，那么就要确定转发的方向，以下是转发规则的格式：ip route IP网段  转发IP
@@ -37,9 +50,7 @@
   如果目的地址在转发规则列出的网段中找不到，我们就确定转发地址是默认转发地址
 
 
-
-
-如果判断IP在不在网段中，可以使用如下方法
+如果判断IP在不在网段中，可以使用如下方法，效率很慢很慢
 ip = IP('74.0.193.20/32')
  for x in ip:
      print(str(x) == '74.0.193.20')
@@ -47,7 +58,46 @@ ip = IP('74.0.193.20/32')
          print("yes")
          
          
-         
+ 推荐一种高效方法：
+ 先将ip转换成32位二进制,再按照正反掩码适配，在网段中返回0，不在返回1
+    # 转换成32位二进制
+    def ipTransByte(ipParam):
+        addrIpTemp = ipParam.split(".")
+        tNo0 = bin(int(addrIpTemp[0])).__str__()[2:]
+        tNo0 = "0" * (8 - len(tNo0)) + tNo0
+        tNo1 = bin(int(addrIpTemp[1])).__str__()[2:]
+        tNo1 = "0" * (8 - len(tNo1)) + tNo1
+        tNo2 = bin(int(addrIpTemp[2])).__str__()[2:]
+        tNo2 = "0" * (8 - len(tNo2)) + tNo2
+        tNo3 = bin(int(addrIpTemp[3])).__str__()[2:]
+        tNo3 = "0" * (8 - len(tNo3)) + tNo3
+        return tNo0 + tNo1 + tNo2 + tNo3
+        
+      # 函数：IP地址与地址段进行适配比较(正掩码)in=>0  not in=>1
+        def ipAdd_Match_Mask(ip1, ip2, mask):
+            ipResult = 0
+            for i in range(0, 32):
+                if (mask[i] == "0"):
+                    continue
+                elif ((mask[i] == "1") and (ip1[i] == ip2[i])):
+                    continue
+                else:
+                    ipResult = 1
+                    break
+            return ipResult
+
+        # 函数：IP地址与地址段进行适配比较(反掩码)
+        def ipAdd_Match_WMask(ip1, ip2, wmask):
+            ipResult = 0
+            for i in range(0, 32):
+                if (wmask[i] == "1"):
+                    continue
+                elif ((wmask[i] == "0") and (ip1[i] == ip2[i])):
+                    continue
+                else:
+                    ipResult = 1
+                    break
+            return ipResult
          
          
          
