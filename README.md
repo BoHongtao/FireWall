@@ -243,6 +243,68 @@
         上个设备的下一跳是否在set ip的网段中，如果在的话，物理接口就是port1
 
 
+
+# SRX防火墙配置及参数说明 #
+
+服务：
+
+根据目的端口及协议，获取服务（协议+端口）
+
+    set applications application tcp7016 protocol tcp
+    set applications application tcp7016 source-port 0-65535
+    set applications application tcp7016 destination-port 7016-7016
+    set applications application tcp7005 protocol tcp
+    set applications application tcp7005 source-port 0-65535
+    set applications application tcp
+	7005 destination-port 7005-7005
+
+
+接口：
+
+获取接口的物理接口（出入接口的IP判断比较和山石一致）
+
+    set interfaces reth0 unit 31 vlan-id 31
+    set interfaces reth0 unit 31 family inet address 11.168.25.30/29
+    set interfaces reth0 unit 32 vlan-id 32
+    set interfaces reth0 unit 32 family inet address 11.168.22.38/29
+
+地址：
+
+获取地址的定义（主要还是看源或者目的是否在网段中）
+
+    set security zones security-zone trust address-book address 11.18.0.0/16 11.168.0.0/16
+    set security zones security-zone trust address-book address 11.16.124.0/24 11.168.14.0/24
+    set security zones security-zone trust address-book address 11.8.158.1/32 11.168.15.1/32
+
+策略：
+查找是否有策略
+
+    set security policies from-zone untrust to-zone trust policy nas20161009_94443_1 match source-address 11.133.122.0/24
+    set security policies from-zone untrust to-zone trust policy nas20161009_94443_1 match source-address 11.133.111.0/24
+    set security policies from-zone untrust to-zone trust policy nas20161009_94443_1 match destination-address 11.118.0.0/16
+    set security policies from-zone untrust to-zone trust policy nas20161009_94443_1 match application tcp26
+    set security policies from-zone untrust to-zone trust policy nas20161009_94443_1 match application tcp22
+    set security policies from-zone untrust to-zone trust policy nas20161009_94443_1 match application tcp338
+    set security policies from-zone untrust to-zone trust policy nas20161009_94443_1 match application tcp1389
+    set security policies from-zone untrust to-zone trust policy nas20161009_94443_1 then deny
+
+其实思路和山石是一致的，首先查找前三个参数：协议（服务定义），源地址+目的地址的定义，出入接口的定义
+然后去ACL(访问控制列表)中查找是否受控制
+
+
+转发方向：
+
+    set routing-options static route 1.130.0.0/16 next-hop 11.170.226.254
+    set routing-options static route 0.0.0.0/0 next-hop 11.168.225.33
+    set routing-options static route 1.18.0.0/16 next-hop 11.168.225.25
+
+
+使用目的地址判断转发方向，看目的地址是在网段中，如果在，后面的next-hop就是下一跳（本设备出口后的转发地址）
+还是和山石一致，0.0.0.0就是默认的转发方向，如果都没有匹配到，最后转发到0.0.0.0/0所指定的nexthop
+
+
+
+
 图解：
     防火墙通过源地址，目的地址，只是为了判断过不过墙
     
