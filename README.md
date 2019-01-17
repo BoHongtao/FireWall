@@ -315,3 +315,43 @@
   ** 源地址----------n层设备-------------入口--防火墙--出口------------n层设备------目的地址**
    
 **   策略是判断从源到目的通不通，通的话才有下一跳，当前设备的出口就是下一个设备的入口，当前设备的入口就是上一个设备的出口**
+
+
+# Net规则 #
+说下映射关系
+
+<table>
+  <tr>
+    <th>33</th>
+    <th>外网</th>
+    <th>内网</th>
+  </tr>
+  <tr>
+    <td>源地址</td>
+    <td>10.168.56.23</td>
+    <td>26.120.153.180</td>
+  </tr>
+  <tr>
+    <td>目的地址</td>
+    <td>26.120.154.58</td>
+    <td>26.120.128.47</td>
+  </tr>
+</table>
+
+
+   	
+    set security nat source pool 26_120_153_180 address 26.120.153.180/32
+
+	定义源net，将源10.168.56.23/32换成源地址池中的ip，目的地址不管
+    set security nat source rule-set Untrust_Trust rule Untrust_nat_FuXingLianHe_2 match source-address 10.168.56.23/32
+    set security nat source rule-set Untrust_Trust rule Untrust_nat_FuXingLianHe_2 match destination-address 26.120.128.47/32
+    set security nat source rule-set Untrust_Trust rule Untrust_nat_FuXingLianHe_2 then source-nat pool 26_120_153_180
+
+    定义目的net，将源26.120.154.58/32换成目的地址池中的ip，源地址不管
+    set security nat destination rule-set Untrust_Trust rule Untrust_nat_FuXingLianHe_2 match source-address 10.168.56.23/32
+    set security nat destination rule-set Untrust_Trust rule Untrust_nat_FuXingLianHe_2 match destination-address 26.120.154.58/32
+    set security nat destination rule-set Untrust_Trust rule Untrust_nat_FuXingLianHe_2 then destination-nat pool 26_120_128_47
+
+
+
+
